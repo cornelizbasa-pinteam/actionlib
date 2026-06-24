@@ -1,0 +1,38 @@
+---
+
+name: CI / Linting
+
+"on":
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  # 1. Validates standard YAML syntax across the entire repository
+  yamllint:
+    name: Run yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Lint YAML files
+        # yamllint is pre-installed on GitHub Actions ubuntu runners
+        run: yamllint --strict .
+
+  # 2. Specifically validates GitHub Actions syntax, context, and security
+  actionlint:
+    name: Run actionlint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Download and run actionlint
+        run: |
+          # Download the latest official actionlint binary
+          bash <(curl -s https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+
+          # Run it against all .github/workflows/*.yml and **/action.yml files
+          ./actionlint -color
